@@ -6,11 +6,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Supabase non configuré" }, { status: 500 });
   }
 
-  const password = request.headers.get("x-admin-password");
-  if (password !== process.env.ADMIN_PASSWORD) {
-    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-  }
-
   const formData = await request.formData();
   const file = formData.get("file") as File | null;
 
@@ -18,14 +13,23 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Aucun fichier fourni" }, { status: 400 });
   }
 
-  const filename = `${Date.now()}-${file.name}`;
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const filename = `${Date.now()}-${safeName}`;
   const buffer = Buffer.from(await file.arrayBuffer());
+
+  const ext = safeName.split(".").pop()?.toLowerCase() || "";
+  const contentTypes: Record<string, string> = {
+    mp3: "audio/mpeg",
+    wav: "audio/wav",
+    ogg: "audio/ogg",
+    flac: "audio/flac",
+    m4a: "audio/mp4",
+  };
 
   const { error } = await supabase.storage
     .from("beats")
     .upload(filename, buffer, {
-      contentType: file.type,
-      upsert: false,
+      contentType: contentTypes[ext] || file.type,
     });
 
   if (error) {

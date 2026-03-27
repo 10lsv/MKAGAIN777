@@ -23,11 +23,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Supabase non configuré" }, { status: 500 });
   }
 
-  const password = request.headers.get("x-admin-password");
-  if (password !== process.env.ADMIN_PASSWORD) {
-    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-  }
-
   const body = await request.json();
   const { data, error } = await supabase.from("beats").insert(body).select().single();
 

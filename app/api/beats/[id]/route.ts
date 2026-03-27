@@ -10,12 +10,6 @@ export async function PUT(
   }
 
   const { id } = await params;
-  const password = request.headers.get("x-admin-password");
-
-  if (password !== process.env.ADMIN_PASSWORD) {
-    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-  }
-
   const body = await request.json();
   const { data, error } = await supabase
     .from("beats")
@@ -40,12 +34,6 @@ export async function DELETE(
   }
 
   const { id } = await params;
-  const password = request.headers.get("x-admin-password");
-
-  if (password !== process.env.ADMIN_PASSWORD) {
-    return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-  }
-
   const { error } = await supabase.from("beats").delete().eq("id", id);
 
   if (error) {

@@ -57,7 +57,13 @@ export default function BeatCard({ beat }: { beat: Beat }) {
         </button>
       </div>
 
-      <audio ref={audioRef} src={beat.audio_url} onEnded={handleEnded} preload="none" />
+      <audio
+        ref={audioRef}
+        src={beat.audio_url}
+        onEnded={handleEnded}
+        onError={() => alert("Erreur audio : impossible de charger " + beat.audio_url)}
+        preload="none"
+      />
 
       <button
         onClick={() => setShowLicenses(!showLicenses)}
