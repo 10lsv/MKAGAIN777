@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { PayPalButtons } from "@paypal/react-paypal-js";
 import type { Beat } from "@/lib/types";
 import { trackEvent } from "./PostHogProvider";
 
@@ -20,6 +21,8 @@ function formatDuration(seconds: number): string {
 export default function BeatCard({ beat }: { beat: Beat }) {
   const [playing, setPlaying] = useState(false);
   const [showLicenses, setShowLicenses] = useState(false);
+  const [selectedLicense, setSelectedLicense] = useState<typeof licenses[number] | null>(null);
+  const [paymentStatus, setPaymentStatus] = useState<"idle" | "processing" | "success" | "error">("idle");
   const audioRef = useRef<HTMLAudioElement>(null);
 
   function togglePlay() {
@@ -33,6 +36,23 @@ export default function BeatCard({ beat }: { beat: Beat }) {
     }
     setPlaying(!playing);
   }
+
+  function handleLicenseClick(lic: typeof licenses[number]) {
+    trackEvent("license_click", { beat_name: beat.title, beat_id: beat.id, license: lic.label });
+    setSelectedLicense(selectedLicense?.key === lic.key ? null : lic);
+    setPaymentStatus("idle");
+  }
+
+  function triggerDownload() {
+    const a = document.createElement("a");
+    a.href = beat.audio_url;
+    a.download = `${beat.title} - ${selectedLicense?.label || "beat"}.mp3`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  const selectedPrice = selectedLicense ? beat[selectedLicense.key] : 0;
 
   return (
     <div className="border-b border-white/5 py-4">
@@ -80,7 +100,13 @@ export default function BeatCard({ beat }: { beat: Beat }) {
         </div>
 
         <button
-          onClick={() => setShowLicenses(!showLicenses)}
+          onClick={() => {
+            setShowLicenses(!showLicenses);
+            if (showLicenses) {
+              setSelectedLicense(null);
+              setPaymentStatus("idle");
+            }
+          }}
           className="text-xs text-white/30 hover:text-white/60 transition-colors shrink-0"
         >
           {showLicenses ? "Fermer" : "Licences"}
@@ -100,13 +126,98 @@ export default function BeatCard({ beat }: { beat: Beat }) {
           {licenses.map((lic) => (
             <div
               key={lic.key}
-              className="flex justify-between text-xs cursor-pointer"
-              onClick={() => trackEvent("license_click", { beat_name: beat.title, beat_id: beat.id, license: lic.label })}
+              className={`flex justify-between text-xs cursor-pointer rounded px-2 py-1.5 transition-colors ${
+                selectedLicense?.key === lic.key
+                  ? "bg-accent/20 text-white"
+                  : "hover:bg-white/5"
+              }`}
+              onClick={() => handleLicenseClick(lic)}
             >
-              <span className="text-white/40">{lic.label}</span>
-              <span className="text-white/70">{beat[lic.key]}&euro;</span>
+              <span className={selectedLicense?.key === lic.key ? "text-white" : "text-white/40"}>
+                {lic.label}
+              </span>
+              <span className={selectedLicense?.key === lic.key ? "text-accent font-medium" : "text-white/70"}>
+                {beat[lic.key]}&euro;
+              </span>
             </div>
           ))}
+
+          {/* PayPal Checkout */}
+          {selectedLicense && paymentStatus !== "success" && (
+            <div className="mt-3 pt-3 border-t border-white/5">
+              <p className="text-xs text-white/50 mb-2">
+                {beat.title} &mdash; {selectedLicense.label} &mdash; {selectedPrice}&euro;
+              </p>
+              {paymentStatus === "error" && (
+                <p className="text-xs text-red-400 mb-2">Erreur de paiement, réessaye.</p>
+              )}
+              {paymentStatus === "processing" && (
+                <p className="text-xs text-white/40 mb-2">Traitement en cours...</p>
+              )}
+              <PayPalButtons
+                style={{
+                  layout: "horizontal",
+                  color: "black",
+                  shape: "rect",
+                  label: "pay",
+                  height: 35,
+                  tagline: false,
+                }}
+                createOrder={async () => {
+                  const res = await fetch("/api/paypal/create-order", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      amount: selectedPrice,
+                      beatTitle: beat.title,
+                      license: selectedLicense.label,
+                    }),
+                  });
+                  const data = await res.json();
+                  if (!res.ok) throw new Error(data.error);
+                  return data.id;
+                }}
+                onApprove={async (data) => {
+                  setPaymentStatus("processing");
+                  try {
+                    const res = await fetch("/api/paypal/capture-order", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ orderId: data.orderID }),
+                    });
+                    const result = await res.json();
+                    if (!res.ok) throw new Error(result.error);
+
+                    setPaymentStatus("success");
+                    trackEvent("purchase", {
+                      beat_name: beat.title,
+                      beat_id: beat.id,
+                      license: selectedLicense.label,
+                      amount: selectedPrice,
+                    });
+                    triggerDownload();
+                  } catch {
+                    setPaymentStatus("error");
+                  }
+                }}
+                onError={() => setPaymentStatus("error")}
+                onCancel={() => setPaymentStatus("idle")}
+              />
+            </div>
+          )}
+
+          {/* Download success */}
+          {paymentStatus === "success" && (
+            <div className="mt-3 pt-3 border-t border-white/5 text-center">
+              <p className="text-xs text-green-400 mb-2">Paiement réussi !</p>
+              <button
+                onClick={triggerDownload}
+                className="text-xs text-accent hover:text-red-400"
+              >
+                Re-télécharger
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
