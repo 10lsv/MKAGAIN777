@@ -28,6 +28,8 @@ export async function POST(request: Request) {
     jpeg: "image/jpeg",
     png: "image/png",
     webp: "image/webp",
+    zip: "application/zip",
+    rar: "application/x-rar-compressed",
   };
 
   const { error } = await supabase.storage

@@ -36,7 +36,9 @@ export default function AdminDashboard() {
     price_exclusive: 200,
     duration: null as number | null,
   });
-  const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [fileMp3, setFileMp3] = useState<File | null>(null);
+  const [fileWav, setFileWav] = useState<File | null>(null);
+  const [fileStems, setFileStems] = useState<File | null>(null);
   const [coverFile, setCoverFile] = useState<File | null>(null);
 
   // Check localStorage on mount
@@ -93,7 +95,9 @@ export default function AdminDashboard() {
 
   function resetForm() {
     setForm({ title: "", bpm: 140, genre: "", price_mp3: 30, price_wav: 50, price_stems: 70, price_exclusive: 200, duration: null });
-    setAudioFile(null);
+    setFileMp3(null);
+    setFileWav(null);
+    setFileStems(null);
     setCoverFile(null);
     setEditingId(null);
   }
@@ -110,7 +114,9 @@ export default function AdminDashboard() {
       price_exclusive: beat.price_exclusive,
       duration: beat.duration,
     });
-    setAudioFile(null);
+    setFileMp3(null);
+    setFileWav(null);
+    setFileStems(null);
     setCoverFile(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -120,37 +126,24 @@ export default function AdminDashboard() {
     setLoading(true);
 
     try {
-      let audio_url = "";
-      let cover_url = "";
-
-      if (audioFile) {
+      async function uploadFile(file: File): Promise<string> {
         const fd = new FormData();
-        fd.append("file", audioFile);
-        const uploadRes = await fetch("/api/upload", {
-          method: "POST",
-          body: fd,
-        });
-        const uploadData = await uploadRes.json();
-        if (!uploadRes.ok) throw new Error(uploadData.error);
-        audio_url = uploadData.url;
+        fd.append("file", file);
+        const res = await fetch("/api/upload", { method: "POST", body: fd });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error);
+        return data.url;
       }
 
-      if (coverFile) {
-        const fd = new FormData();
-        fd.append("file", coverFile);
-        const uploadRes = await fetch("/api/upload", {
-          method: "POST",
-          body: fd,
-        });
-        const uploadData = await uploadRes.json();
-        if (!uploadRes.ok) throw new Error(uploadData.error);
-        cover_url = uploadData.url;
-      }
+      const urls: Record<string, string> = {};
+
+      if (fileMp3) urls.audio_url = await uploadFile(fileMp3);
+      if (fileWav) urls.audio_wav = await uploadFile(fileWav);
+      if (fileStems) urls.audio_stems = await uploadFile(fileStems);
+      if (coverFile) urls.cover_url = await uploadFile(coverFile);
 
       if (editingId) {
-        const body: Record<string, unknown> = { ...form };
-        if (audio_url) body.audio_url = audio_url;
-        if (cover_url) body.cover_url = cover_url;
+        const body: Record<string, unknown> = { ...form, ...urls };
 
         const res = await fetch(`/api/beats/${editingId}`, {
           method: "PUT",
@@ -162,12 +155,18 @@ export default function AdminDashboard() {
           throw new Error(err.error);
         }
       } else {
-        if (!audio_url) throw new Error("Fichier audio requis");
+        if (!urls.audio_url) throw new Error("Fichier MP3 requis");
 
         const res = await fetch("/api/beats", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...form, audio_url, cover_url: cover_url || null }),
+          body: JSON.stringify({
+            ...form,
+            ...urls,
+            audio_wav: urls.audio_wav || null,
+            audio_stems: urls.audio_stems || null,
+            cover_url: urls.cover_url || null,
+          }),
         });
         if (!res.ok) {
           const err = await res.json();
@@ -306,14 +305,14 @@ export default function AdminDashboard() {
           </div>
           <div>
             <label className="block text-sm text-white/70 mb-1">
-              Fichier audio {editingId && "(optionnel)"}
+              Fichier MP3 {editingId && "(optionnel)"}
             </label>
             <input
               type="file"
-              accept="audio/*"
+              accept=".mp3,audio/mpeg"
               onChange={(e) => {
                 const file = e.target.files?.[0] ?? null;
-                setAudioFile(file);
+                setFileMp3(file);
                 if (file) {
                   const url = URL.createObjectURL(file);
                   const audio = new Audio(url);
@@ -324,6 +323,28 @@ export default function AdminDashboard() {
                 }
               }}
               required={!editingId}
+              className="w-full text-sm text-white/70 file:mr-3 file:rounded file:border-0 file:bg-accent file:px-3 file:py-1.5 file:text-sm file:text-white file:cursor-pointer"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-white/70 mb-1">
+              Fichier WAV {editingId ? "(optionnel)" : ""}
+            </label>
+            <input
+              type="file"
+              accept=".wav,audio/wav"
+              onChange={(e) => setFileWav(e.target.files?.[0] ?? null)}
+              className="w-full text-sm text-white/70 file:mr-3 file:rounded file:border-0 file:bg-accent file:px-3 file:py-1.5 file:text-sm file:text-white file:cursor-pointer"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-white/70 mb-1">
+              Fichier Stems (ZIP) {editingId ? "(optionnel)" : ""}
+            </label>
+            <input
+              type="file"
+              accept=".zip,.rar,application/zip"
+              onChange={(e) => setFileStems(e.target.files?.[0] ?? null)}
               className="w-full text-sm text-white/70 file:mr-3 file:rounded file:border-0 file:bg-accent file:px-3 file:py-1.5 file:text-sm file:text-white file:cursor-pointer"
             />
           </div>
