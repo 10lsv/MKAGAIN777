@@ -18,6 +18,14 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
+  const [analytics, setAnalytics] = useState<{
+    topBeats: { name: string; count: number }[];
+    topLicenses: { license: string; count: number }[];
+    visitsToday: number;
+    visitsWeek: number;
+  } | null>(null);
+  const [analyticsError, setAnalyticsError] = useState("");
+
   const [form, setForm] = useState({
     title: "",
     bpm: 140,
@@ -43,9 +51,27 @@ export default function AdminDashboard() {
     if (Array.isArray(data)) setBeats(data);
   }, []);
 
+  const fetchAnalytics = useCallback(async () => {
+    try {
+      const res = await fetch("/api/analytics");
+      const data = await res.json();
+      if (data.error) {
+        setAnalyticsError(data.error);
+      } else {
+        setAnalytics(data);
+        setAnalyticsError("");
+      }
+    } catch {
+      setAnalyticsError("Impossible de charger les analytics");
+    }
+  }, []);
+
   useEffect(() => {
-    if (authenticated) fetchBeats();
-  }, [authenticated, fetchBeats]);
+    if (authenticated) {
+      fetchBeats();
+      fetchAnalytics();
+    }
+  }, [authenticated, fetchBeats, fetchAnalytics]);
 
   function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -364,6 +390,77 @@ export default function AdminDashboard() {
           )}
         </div>
       </form>
+
+      {/* Analytics */}
+      <div className="mt-10 rounded border border-white/10 bg-[#1a1a1a] p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">
+            Analytics <span className="text-accent">PostHog</span>
+          </h2>
+          <button
+            onClick={fetchAnalytics}
+            className="rounded border border-white/20 px-3 py-1 text-xs text-white/50 hover:text-white hover:border-white/40"
+          >
+            Rafraîchir
+          </button>
+        </div>
+
+        {analyticsError ? (
+          <p className="text-sm text-red-400">{analyticsError}</p>
+        ) : !analytics ? (
+          <p className="text-sm text-white/30">Chargement...</p>
+        ) : (
+          <>
+            {/* Visits */}
+            <div className="grid gap-4 sm:grid-cols-2 mb-6">
+              <div className="rounded border border-white/10 bg-white/5 p-4 text-center">
+                <p className="text-2xl font-bold text-accent">{analytics.visitsToday}</p>
+                <p className="text-xs text-white/40 mt-1">Visites aujourd&apos;hui</p>
+              </div>
+              <div className="rounded border border-white/10 bg-white/5 p-4 text-center">
+                <p className="text-2xl font-bold text-accent">{analytics.visitsWeek}</p>
+                <p className="text-xs text-white/40 mt-1">Visites cette semaine</p>
+              </div>
+            </div>
+
+            <div className="grid gap-6 sm:grid-cols-2">
+              {/* Top beats */}
+              <div>
+                <h3 className="text-sm font-semibold text-white/70 mb-2">Beats les plus écoutés</h3>
+                {analytics.topBeats.length === 0 ? (
+                  <p className="text-xs text-white/30">Aucune donnée</p>
+                ) : (
+                  <div className="space-y-1.5">
+                    {analytics.topBeats.map((b, i) => (
+                      <div key={i} className="flex justify-between text-xs">
+                        <span className="text-white/60 truncate mr-2">{b.name}</span>
+                        <span className="text-white/40 shrink-0">{b.count} plays</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Top licenses */}
+              <div>
+                <h3 className="text-sm font-semibold text-white/70 mb-2">Licences les plus cliquées</h3>
+                {analytics.topLicenses.length === 0 ? (
+                  <p className="text-xs text-white/30">Aucune donnée</p>
+                ) : (
+                  <div className="space-y-1.5">
+                    {analytics.topLicenses.map((l, i) => (
+                      <div key={i} className="flex justify-between text-xs">
+                        <span className="text-white/60">{l.license}</span>
+                        <span className="text-white/40">{l.count} clics</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
 
       {/* Beats list */}
       <div className="mt-10">

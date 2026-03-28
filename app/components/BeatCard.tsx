@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import type { Beat } from "@/lib/types";
+import { trackEvent } from "./PostHogProvider";
 
 const licenses = [
   { key: "price_mp3", label: "MP3" },
@@ -23,7 +24,12 @@ export default function BeatCard({ beat }: { beat: Beat }) {
   function togglePlay() {
     const audio = audioRef.current;
     if (!audio) return;
-    if (playing) { audio.pause(); } else { audio.play(); }
+    if (playing) {
+      audio.pause();
+    } else {
+      audio.play();
+      trackEvent("beat_play", { beat_name: beat.title, beat_id: beat.id });
+    }
     setPlaying(!playing);
   }
 
@@ -91,7 +97,11 @@ export default function BeatCard({ beat }: { beat: Beat }) {
       {showLicenses && (
         <div className="mt-3 ml-15 space-y-1">
           {licenses.map((lic) => (
-            <div key={lic.key} className="flex justify-between text-xs">
+            <div
+              key={lic.key}
+              className="flex justify-between text-xs cursor-pointer"
+              onClick={() => trackEvent("license_click", { beat_name: beat.title, beat_id: beat.id, license: lic.label })}
+            >
               <span className="text-white/40">{lic.label}</span>
               <span className="text-white/70">{beat[lic.key]}&euro;</span>
             </div>
@@ -101,6 +111,7 @@ export default function BeatCard({ beat }: { beat: Beat }) {
             <a
               href={`mailto:leo3elexo3@gmail.com?subject=Offre exclusive - ${encodeURIComponent(beat.title)}`}
               className="text-accent hover:text-red-400"
+              onClick={() => trackEvent("license_click", { beat_name: beat.title, beat_id: beat.id, license: "Exclusivité" })}
             >
               Offre
             </a>
