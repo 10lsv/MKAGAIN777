@@ -3,8 +3,7 @@ import type { Beat } from "@/lib/types";
 import BeatCard from "../components/BeatCard";
 
 export const metadata = {
-  title: "Beats - MK Beats",
-  description: "Catalogue de beats et instrumentales par MK",
+  title: "Beats - MK",
 };
 
 export default async function BeatsPage() {
@@ -19,20 +18,13 @@ export default async function BeatsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-6 py-16">
-      <h1 className="text-4xl font-bold">
-        <span className="text-accent">Beats</span> Store
-      </h1>
-      <p className="mt-2 text-white/50">
-        Écoute, choisis ta licence, et télécharge.
-      </p>
+    <div className="mx-auto max-w-lg px-5 py-12 md:max-w-3xl md:px-8">
+      <h1 className="text-lg font-bold tracking-wide md:text-2xl">Beats</h1>
 
       {beats.length === 0 ? (
-        <p className="mt-12 text-center text-white/40">
-          Aucun beat disponible pour le moment. Reviens bientôt !
-        </p>
+        <p className="mt-8 text-sm text-white/30">Aucun beat disponible.</p>
       ) : (
-        <div className="mt-10 grid gap-6 sm:grid-cols-2">
+        <div className="mt-6 md:grid md:grid-cols-2 md:gap-x-8">
           {beats.map((beat) => (
             <BeatCard key={beat.id} beat={beat} />
           ))}

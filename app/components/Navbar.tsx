@@ -16,20 +16,20 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <nav className="border-b border-white/10 bg-[#0a0a0a]">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <Link href="/" className="text-2xl font-bold tracking-wider text-accent">
+    <nav className="px-5 py-4 md:px-8 md:py-6">
+      <div className="mx-auto flex max-w-5xl items-center justify-between">
+        <Link href="/" className="text-lg font-bold tracking-widest text-accent md:text-xl">
           MK
         </Link>
 
         {/* Desktop */}
-        <div className="hidden gap-8 md:flex">
+        <div className="hidden gap-8 sm:flex">
           {links.map((l) => (
             <Link
               key={l.href}
               href={l.href}
-              className={`text-sm font-medium transition-colors hover:text-accent ${
-                pathname === l.href ? "text-accent" : "text-white/70"
+              className={`text-xs uppercase tracking-wide transition-colors ${
+                pathname === l.href ? "text-white" : "text-white/40 hover:text-white/70"
               }`}
             >
               {l.label}
@@ -37,32 +37,31 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* Mobile toggle */}
+        {/* Mobile */}
         <button
-          className="text-white/70 md:hidden"
+          className="text-white/40 sm:hidden"
           onClick={() => setOpen(!open)}
           aria-label="Menu"
         >
-          <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             {open ? (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             ) : (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 8h16M4 16h16" />
             )}
           </svg>
         </button>
       </div>
 
-      {/* Mobile menu */}
       {open && (
-        <div className="border-t border-white/10 px-6 pb-4 md:hidden">
+        <div className="mt-3 flex flex-col gap-2 sm:hidden">
           {links.map((l) => (
             <Link
               key={l.href}
               href={l.href}
               onClick={() => setOpen(false)}
-              className={`block py-2 text-sm font-medium transition-colors hover:text-accent ${
-                pathname === l.href ? "text-accent" : "text-white/70"
+              className={`text-xs uppercase tracking-wide py-1 ${
+                pathname === l.href ? "text-white" : "text-white/40"
               }`}
             >
               {l.label}

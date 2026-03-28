@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #111111;
-  --foreground: #eeeeee;
+  --background: #000000;
+  --foreground: #e5e5e5;
   --accent: #DC143C;
 }
 
@@ -12,25 +12,12 @@
   --color-accent: var(--accent);
 }
 
+* {
+  scrollbar-width: none;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: #000;
+  color: #e5e5e5;
   font-family: Arial, Helvetica, sans-serif;
-}
-
-/* Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #111;
-}
-::-webkit-scrollbar-thumb {
-  background: #333;
-  border-radius: 3px;
-}
-
-/* Audio player custom */
-audio::-webkit-media-controls-panel {
-  background: #1a1a1a;
 }

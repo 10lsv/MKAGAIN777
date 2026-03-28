@@ -24,6 +24,10 @@ export async function POST(request: Request) {
     ogg: "audio/ogg",
     flac: "audio/flac",
     m4a: "audio/mp4",
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    png: "image/png",
+    webp: "image/webp",
   };
 
   const { error } = await supabase.storage
