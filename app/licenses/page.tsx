@@ -25,7 +25,7 @@ const licenseData = [
   },
   {
     name: "Exclusivit\u00e9",
-    price: null,
+    price: "200",
     detail: "WAV + Stems + Projet",
     terms: "Streams illimit\u00e9s, pas de cr\u00e9dit, contrat fourni",
   },
@@ -41,16 +41,7 @@ export default function LicensesPage() {
           <div key={lic.name} className="border-b border-white/5 pb-6 md:border-b-0">
             <div className="flex items-baseline justify-between">
               <h3 className="text-sm font-medium md:text-base">{lic.name}</h3>
-              {lic.price ? (
-                <span className="text-sm text-accent font-medium">{lic.price}&euro;</span>
-              ) : (
-                <a
-                  href="mailto:leo3elexo3@gmail.com?subject=Demande d'exclusivit\u00e9"
-                  className="text-xs text-accent hover:text-red-400"
-                >
-                  Contacter
-                </a>
-              )}
+              <span className="text-sm text-accent font-medium">{lic.price}&euro;</span>
             </div>
             <p className="mt-1 text-xs text-white/30">{lic.detail}</p>
             <p className="mt-1 text-xs text-white/20">{lic.terms}</p>

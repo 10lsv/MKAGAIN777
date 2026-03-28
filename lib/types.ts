@@ -9,5 +9,6 @@ export interface Beat {
   price_mp3: number;
   price_wav: number;
   price_stems: number;
+  price_exclusive: number;
   created_at: string;
 }

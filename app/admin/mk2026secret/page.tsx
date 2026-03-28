@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import type { Beat } from "@/lib/types";
 
-const ADMIN_EMAIL = "leo3elexo3@gmail.com";
+const ADMIN_EMAIL = "mkbeats48@gmail.com";
 const ADMIN_PASSWORD = "MK@beats2026!MadeByLSVprodNuage666!!";
 const AUTH_KEY = "mk_admin_auth";
 
@@ -33,6 +33,7 @@ export default function AdminDashboard() {
     price_mp3: 30,
     price_wav: 50,
     price_stems: 70,
+    price_exclusive: 200,
     duration: null as number | null,
   });
   const [audioFile, setAudioFile] = useState<File | null>(null);
@@ -91,7 +92,7 @@ export default function AdminDashboard() {
   }
 
   function resetForm() {
-    setForm({ title: "", bpm: 140, genre: "", price_mp3: 30, price_wav: 50, price_stems: 70, duration: null });
+    setForm({ title: "", bpm: 140, genre: "", price_mp3: 30, price_wav: 50, price_stems: 70, price_exclusive: 200, duration: null });
     setAudioFile(null);
     setCoverFile(null);
     setEditingId(null);
@@ -106,6 +107,7 @@ export default function AdminDashboard() {
       price_mp3: beat.price_mp3,
       price_wav: beat.price_wav,
       price_stems: beat.price_stems,
+      price_exclusive: beat.price_exclusive,
       duration: beat.duration,
     });
     setAudioFile(null);
@@ -338,9 +340,9 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-4">
           <div>
-            <label className="block text-sm text-white/70 mb-1">Prix MP3 (&euro;)</label>
+            <label className="block text-sm text-white/70 mb-1">MP3 (&euro;)</label>
             <input
               type="number"
               value={form.price_mp3}
@@ -350,7 +352,7 @@ export default function AdminDashboard() {
             />
           </div>
           <div>
-            <label className="block text-sm text-white/70 mb-1">Prix WAV (&euro;)</label>
+            <label className="block text-sm text-white/70 mb-1">WAV (&euro;)</label>
             <input
               type="number"
               value={form.price_wav}
@@ -360,11 +362,21 @@ export default function AdminDashboard() {
             />
           </div>
           <div>
-            <label className="block text-sm text-white/70 mb-1">Prix Stems (&euro;)</label>
+            <label className="block text-sm text-white/70 mb-1">Stems (&euro;)</label>
             <input
               type="number"
               value={form.price_stems}
               onChange={(e) => setForm({ ...form, price_stems: Number(e.target.value) })}
+              required
+              className="w-full rounded border border-white/10 bg-white/5 px-4 py-2 text-sm text-white outline-none focus:border-accent"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-white/70 mb-1">Exclu (&euro;)</label>
+            <input
+              type="number"
+              value={form.price_exclusive}
+              onChange={(e) => setForm({ ...form, price_exclusive: Number(e.target.value) })}
               required
               className="w-full rounded border border-white/10 bg-white/5 px-4 py-2 text-sm text-white outline-none focus:border-accent"
             />
@@ -494,7 +506,7 @@ export default function AdminDashboard() {
                     <p className="text-xs text-white/40">
                       {beat.bpm} BPM &middot; {beat.genre}
                       {beat.duration != null && <> &middot; {Math.floor(beat.duration / 60)}:{String(Math.floor(beat.duration % 60)).padStart(2, "0")}</>}
-                      {" "}&middot; MP3: {beat.price_mp3}&euro; / WAV: {beat.price_wav}&euro; / Stems: {beat.price_stems}&euro;
+                      {" "}&middot; MP3: {beat.price_mp3}&euro; / WAV: {beat.price_wav}&euro; / Stems: {beat.price_stems}&euro; / Exclu: {beat.price_exclusive}&euro;
                     </p>
                   </div>
                 </div>

@@ -8,6 +8,7 @@ const licenses = [
   { key: "price_mp3", label: "MP3" },
   { key: "price_wav", label: "WAV" },
   { key: "price_stems", label: "Stems" },
+  { key: "price_exclusive", label: "Exclusivité" },
 ] as const;
 
 function formatDuration(seconds: number): string {
@@ -106,16 +107,6 @@ export default function BeatCard({ beat }: { beat: Beat }) {
               <span className="text-white/70">{beat[lic.key]}&euro;</span>
             </div>
           ))}
-          <div className="flex justify-between text-xs">
-            <span className="text-white/40">Exclusivit&eacute;</span>
-            <a
-              href={`mailto:leo3elexo3@gmail.com?subject=Offre exclusive - ${encodeURIComponent(beat.title)}`}
-              className="text-accent hover:text-red-400"
-              onClick={() => trackEvent("license_click", { beat_name: beat.title, beat_id: beat.id, license: "Exclusivité" })}
-            >
-              Offre
-            </a>
-          </div>
         </div>
       )}
     </div>
