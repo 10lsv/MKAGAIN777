@@ -32,6 +32,9 @@ export default function AdminDashboard() {
   } | null>(null);
   const [analyticsError, setAnalyticsError] = useState("");
 
+  const [licenses, setLicenses] = useState<{ id: string; name: string; price: number; detail: string; terms: string }[]>([]);
+  const [savingLicenses, setSavingLicenses] = useState(false);
+
   const [form, setForm] = useState({
     title: "",
     bpm: 140,
@@ -75,12 +78,39 @@ export default function AdminDashboard() {
     }
   }, []);
 
+  const fetchLicenses = useCallback(async () => {
+    const res = await fetch("/api/licenses");
+    const data = await res.json();
+    if (Array.isArray(data)) setLicenses(data);
+  }, []);
+
+  async function saveLicenses() {
+    setSavingLicenses(true);
+    try {
+      const res = await fetch("/api/licenses", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(licenses),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error);
+      }
+      alert("Licences mises à jour !");
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Erreur");
+    } finally {
+      setSavingLicenses(false);
+    }
+  }
+
   useEffect(() => {
     if (authenticated) {
       fetchBeats();
       fetchAnalytics();
+      fetchLicenses();
     }
-  }, [authenticated, fetchBeats, fetchAnalytics]);
+  }, [authenticated, fetchBeats, fetchAnalytics, fetchLicenses]);
 
   function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -503,6 +533,72 @@ export default function AdminDashboard() {
                 )}
               </div>
             </div>
+          </>
+        )}
+      </div>
+
+      {/* Licenses config */}
+      <div className="mt-10 rounded border border-white/10 bg-[#1a1a1a] p-6">
+        <h2 className="text-lg font-semibold mb-4">
+          Prix des <span className="text-accent">Licences</span>
+        </h2>
+
+        {licenses.length === 0 ? (
+          <p className="text-sm text-white/30">Chargement...</p>
+        ) : (
+          <>
+            <div className="space-y-3">
+              {licenses.map((lic, i) => (
+                <div key={lic.id} className="grid grid-cols-4 gap-3 items-end">
+                  <div>
+                    <label className="block text-xs text-white/40 mb-1">{lic.name} — Prix (&euro;)</label>
+                    <input
+                      type="number"
+                      value={lic.price}
+                      onChange={(e) => {
+                        const updated = [...licenses];
+                        updated[i] = { ...lic, price: Number(e.target.value) };
+                        setLicenses(updated);
+                      }}
+                      className="w-full rounded border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-accent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-white/40 mb-1">Détail</label>
+                    <input
+                      type="text"
+                      value={lic.detail}
+                      onChange={(e) => {
+                        const updated = [...licenses];
+                        updated[i] = { ...lic, detail: e.target.value };
+                        setLicenses(updated);
+                      }}
+                      className="w-full rounded border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-accent"
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="block text-xs text-white/40 mb-1">Conditions</label>
+                    <input
+                      type="text"
+                      value={lic.terms}
+                      onChange={(e) => {
+                        const updated = [...licenses];
+                        updated[i] = { ...lic, terms: e.target.value };
+                        setLicenses(updated);
+                      }}
+                      className="w-full rounded border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-accent"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={saveLicenses}
+              disabled={savingLicenses}
+              className="mt-4 rounded bg-accent px-6 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-50"
+            >
+              {savingLicenses ? "Enregistrement..." : "Enregistrer les licences"}
+            </button>
           </>
         )}
       </div>
