@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 
+export const config = {
+  api: { bodyParser: false },
+};
+
+// Allow up to 200MB uploads
+export const maxDuration = 60;
+
 export async function POST(request: Request) {
   if (!supabase) {
     return NextResponse.json({ error: "Supabase non configuré" }, { status: 500 });
