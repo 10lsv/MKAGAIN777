@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 import { supabase } from "@/lib/supabase";
 
 export const config = {
@@ -9,7 +10,9 @@ export const config = {
 export const maxDuration = 60;
 
 export async function POST(request: Request) {
-  if (!supabase) {
+  // Use service role key if available (bypasses RLS), fallback to anon
+  const client = supabaseAdmin || supabase;
+  if (!client) {
     return NextResponse.json({ error: "Supabase non configuré" }, { status: 500 });
   }
 
@@ -39,7 +42,7 @@ export async function POST(request: Request) {
     rar: "application/x-rar-compressed",
   };
 
-  const { error } = await supabase.storage
+  const { error } = await client.storage
     .from("beats")
     .upload(filename, buffer, {
       contentType: contentTypes[ext] || file.type,
@@ -49,7 +52,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  const { data: urlData } = supabase.storage.from("beats").getPublicUrl(filename);
+  const { data: urlData } = client.storage.from("beats").getPublicUrl(filename);
 
   return NextResponse.json({ url: urlData.publicUrl });
 }
