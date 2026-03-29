@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
-const POSTHOG_HOST = process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.i.posthog.com";
-const POSTHOG_PERSONAL_API_KEY = process.env.POSTHOG_PERSONAL_API_KEY;
-const POSTHOG_PROJECT_ID = process.env.POSTHOG_PROJECT_ID;
+const POSTHOG_HOST = (process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com").trim();
+const POSTHOG_PERSONAL_API_KEY = process.env.POSTHOG_PERSONAL_API_KEY?.trim();
+const POSTHOG_PROJECT_ID = process.env.POSTHOG_PROJECT_ID?.trim();
 
 async function hogql(query: string) {
   const res = await fetch(`${POSTHOG_HOST}/api/projects/${POSTHOG_PROJECT_ID}/query/`, {

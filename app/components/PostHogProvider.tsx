@@ -4,8 +4,8 @@ import posthog from "posthog-js";
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 
-const key = process.env.NEXT_PUBLIC_POSTHOG_KEY;
-const host = process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://eu.i.posthog.com";
+const key = process.env.NEXT_PUBLIC_POSTHOG_KEY?.trim();
+const host = (process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com").trim();
 
 let initialized = false;
 
