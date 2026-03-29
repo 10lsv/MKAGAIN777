@@ -1,7 +1,13 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { createClient } from "@supabase/supabase-js";
 import type { Beat } from "@/lib/types";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 const ADMIN_EMAIL = "mkbeats48@gmail.com";
 const ADMIN_PASSWORD = "MK@beats2026!MadeByLSVprodNuage666!!";
@@ -127,12 +133,17 @@ export default function AdminDashboard() {
 
     try {
       async function uploadFile(file: File): Promise<string> {
-        const fd = new FormData();
-        fd.append("file", file);
-        const res = await fetch("/api/upload", { method: "POST", body: fd });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error);
-        return data.url;
+        const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const filename = `${Date.now()}-${safeName}`;
+
+        const { error } = await supabase.storage
+          .from("beats")
+          .upload(filename, file, { contentType: file.type });
+
+        if (error) throw new Error(error.message);
+
+        const { data: urlData } = supabase.storage.from("beats").getPublicUrl(filename);
+        return urlData.publicUrl;
       }
 
       const urls: Record<string, string> = {};
