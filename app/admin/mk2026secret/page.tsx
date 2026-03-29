@@ -81,7 +81,20 @@ export default function AdminDashboard() {
   const fetchLicenses = useCallback(async () => {
     const res = await fetch("/api/licenses");
     const data = await res.json();
-    if (Array.isArray(data)) setLicenses(data);
+    if (Array.isArray(data)) {
+      setLicenses(data);
+      const mp3 = data.find((l: { id: string }) => l.id === "mp3");
+      const wav = data.find((l: { id: string }) => l.id === "wav");
+      const stems = data.find((l: { id: string }) => l.id === "stems");
+      const exclu = data.find((l: { id: string }) => l.id === "exclusive");
+      setForm((prev) => ({
+        ...prev,
+        price_mp3: mp3?.price ?? prev.price_mp3,
+        price_wav: wav?.price ?? prev.price_wav,
+        price_stems: stems?.price ?? prev.price_stems,
+        price_exclusive: exclu?.price ?? prev.price_exclusive,
+      }));
+    }
   }, []);
 
   async function saveLicenses() {
@@ -130,7 +143,11 @@ export default function AdminDashboard() {
   }
 
   function resetForm() {
-    setForm({ title: "", bpm: 140, genre: "", price_mp3: 30, price_wav: 50, price_stems: 70, price_exclusive: 200, duration: null });
+    const mp3 = licenses.find((l) => l.id === "mp3");
+    const wav = licenses.find((l) => l.id === "wav");
+    const stems = licenses.find((l) => l.id === "stems");
+    const exclu = licenses.find((l) => l.id === "exclusive");
+    setForm({ title: "", bpm: 140, genre: "", price_mp3: mp3?.price ?? 30, price_wav: wav?.price ?? 50, price_stems: stems?.price ?? 70, price_exclusive: exclu?.price ?? 200, duration: null });
     setFileMp3(null);
     setFileWav(null);
     setStemsLink("");
