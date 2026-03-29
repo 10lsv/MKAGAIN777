@@ -44,7 +44,7 @@ export default function AdminDashboard() {
   });
   const [fileMp3, setFileMp3] = useState<File | null>(null);
   const [fileWav, setFileWav] = useState<File | null>(null);
-  const [fileStems, setFileStems] = useState<File | null>(null);
+  const [stemsLink, setStemsLink] = useState("");
   const [coverFile, setCoverFile] = useState<File | null>(null);
 
   // Check localStorage on mount
@@ -103,7 +103,7 @@ export default function AdminDashboard() {
     setForm({ title: "", bpm: 140, genre: "", price_mp3: 30, price_wav: 50, price_stems: 70, price_exclusive: 200, duration: null });
     setFileMp3(null);
     setFileWav(null);
-    setFileStems(null);
+    setStemsLink("");
     setCoverFile(null);
     setEditingId(null);
   }
@@ -122,7 +122,7 @@ export default function AdminDashboard() {
     });
     setFileMp3(null);
     setFileWav(null);
-    setFileStems(null);
+    setStemsLink(beat.audio_stems || "");
     setCoverFile(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -150,7 +150,7 @@ export default function AdminDashboard() {
 
       if (fileMp3) urls.audio_url = await uploadFile(fileMp3);
       if (fileWav) urls.audio_wav = await uploadFile(fileWav);
-      if (fileStems) urls.audio_stems = await uploadFile(fileStems);
+      if (stemsLink) urls.audio_stems = stemsLink;
       if (coverFile) urls.cover_url = await uploadFile(coverFile);
 
       if (editingId) {
@@ -350,13 +350,14 @@ export default function AdminDashboard() {
           </div>
           <div>
             <label className="block text-sm text-white/70 mb-1">
-              Fichier Stems (ZIP) {editingId ? "(optionnel)" : ""}
+              Lien Stems (Drive, optionnel)
             </label>
             <input
-              type="file"
-              accept=".zip,.rar,application/zip"
-              onChange={(e) => setFileStems(e.target.files?.[0] ?? null)}
-              className="w-full text-sm text-white/70 file:mr-3 file:rounded file:border-0 file:bg-accent file:px-3 file:py-1.5 file:text-sm file:text-white file:cursor-pointer"
+              type="url"
+              value={stemsLink}
+              onChange={(e) => setStemsLink(e.target.value)}
+              placeholder="https://drive.google.com/..."
+              className="w-full rounded border border-white/10 bg-white/5 px-4 py-2 text-sm text-white placeholder-white/20 outline-none focus:border-accent"
             />
           </div>
           <div>
