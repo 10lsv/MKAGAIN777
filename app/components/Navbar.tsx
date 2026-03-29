@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import Logo from "./Logo";
+import Socials from "./Socials";
 
 const links = [
-  { href: "/", label: "Accueil" },
   { href: "/beats", label: "Beats" },
   { href: "/services", label: "Services" },
   { href: "/licenses", label: "Licences" },
@@ -16,14 +17,15 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <nav className="px-5 py-4 md:px-8 md:py-6">
+    <nav className="border-b border-white/5 px-5 py-3 md:px-8 md:py-4">
       <div className="mx-auto flex max-w-5xl items-center justify-between">
-        <Link href="/" className="text-lg font-bold tracking-widest text-accent md:text-xl">
-          MK
+        <Link href="/" className="flex items-center gap-2.5">
+          <Logo size={32} />
+          <span className="text-sm font-bold tracking-widest text-white hidden sm:block">MK BEATS</span>
         </Link>
 
         {/* Desktop */}
-        <div className="hidden gap-8 sm:flex">
+        <div className="hidden items-center gap-8 sm:flex">
           {links.map((l) => (
             <Link
               key={l.href}
@@ -35,6 +37,7 @@ export default function Navbar() {
               {l.label}
             </Link>
           ))}
+          <Socials />
         </div>
 
         {/* Mobile */}
@@ -54,19 +57,20 @@ export default function Navbar() {
       </div>
 
       {open && (
-        <div className="mt-3 flex flex-col gap-2 sm:hidden">
+        <div className="mt-3 flex flex-col gap-2 border-t border-white/5 pt-3 sm:hidden">
           {links.map((l) => (
             <Link
               key={l.href}
               href={l.href}
               onClick={() => setOpen(false)}
-              className={`text-xs uppercase tracking-wide py-1 ${
+              className={`text-xs uppercase tracking-wide py-1.5 ${
                 pathname === l.href ? "text-white" : "text-white/40"
               }`}
             >
               {l.label}
             </Link>
           ))}
+          <Socials className="mt-2 pb-1" />
         </div>
       )}
     </nav>

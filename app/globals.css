@@ -19,5 +19,56 @@
 body {
   background: #000;
   color: #e5e5e5;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out both;
+}
+
+.animate-fade-in-delay {
+  animation: fade-in 0.5s ease-out 0.15s both;
+}
+
+.animate-fade-in-delay-2 {
+  animation: fade-in 0.5s ease-out 0.3s both;
+}
+
+/* Instagram - pulse + glow */
+@keyframes insta-pulse {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0px transparent); color: rgba(255,255,255,0.3); }
+  50% { transform: scale(1.3); filter: drop-shadow(0 0 10px #E1306C); color: #E1306C; }
+}
+
+/* YouTube - bounce */
+@keyframes yt-bounce {
+  0%, 100% { transform: translateY(0); color: rgba(255,255,255,0.3); }
+  30% { transform: translateY(-10px); color: #FF0000; }
+  50% { transform: translateY(0); }
+  70% { transform: translateY(-5px); color: #FF0000; }
+}
+
+/* TikTok - spin + glitch */
+@keyframes tiktok-spin {
+  0%, 100% { transform: rotate(0deg) scale(1); color: rgba(255,255,255,0.3); filter: drop-shadow(0 0 0px transparent); }
+  25% { transform: rotate(15deg) scale(1.2); color: #69C9D0; filter: drop-shadow(2px 0 0 #EE1D52); }
+  50% { transform: rotate(0deg) scale(1); color: rgba(255,255,255,0.3); filter: drop-shadow(0 0 0px transparent); }
+  75% { transform: rotate(-15deg) scale(1.2); color: #EE1D52; filter: drop-shadow(-2px 0 0 #69C9D0); }
+}
+
+.animate-float-1 {
+  animation: insta-pulse 2s ease-in-out infinite;
+}
+
+.animate-float-2 {
+  animation: yt-bounce 1.8s ease-in-out infinite;
+}
+
+.animate-float-3 {
+  animation: tiktok-spin 2.5s ease-in-out infinite;
 }
